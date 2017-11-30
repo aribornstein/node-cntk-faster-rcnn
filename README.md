@@ -1,11 +1,7 @@
 # cntk-fastrcnn for node.js
-A node wrapper a CNTK Fast-RCNN model
+A node wrapper a CNTK Faster-RCNN model
 
-Note: The model works with CNTK v2 Models. 
-For more info about the CNTK Fast-RCNN implementation, take a look at [this tutorial](https://github.com/Microsoft/CNTK/wiki/Object-Detection-using-Fast-R-CNN) and [this notebook](https://github.com/nadavbar/cntk-fastrcnn/blob/master/frcnn_eval.ipynb).
-
-The module uses the FRCNNDetector implementation from <a href="https://github.com/CatalystCode/CNTK-FastRCNNDetector">here</a>.
-
+This module is based on the work done by ![Nadav Bar](https://github.com/nadavbar/node-cntk-fastrcnn/) the evaluation script has been updated to support cntk faster-rcnn 
 
 ### Installation
 Install by running:
@@ -17,10 +13,10 @@ npm install cntk-fastrcnn
 ## Python Preliminaries
 
 Since the FRCNN detector uses bits of the CNTK Fast-RCNN implementation it has the same requirements as the CNTK
-Fast-RCNN training pipeline. 
+Faster-RCNN training pipeline. 
 
 Before running the code in this repository, please make sure to install the required python packages as described
-in <a href="https://github.com/Microsoft/CNTK/wiki/Object-Detection-using-Fast-R-CNN#setup">the Fast-RCNN CNTK tutorial</a>.  
+in <a href="https://docs.microsoft.com/en-us/cognitive-toolkit/object-detection-using-faster-r-cnn#setup">the Fast-RCNN CNTK tutorial</a>.  
 
 
 ###How to use
@@ -28,7 +24,7 @@ in <a href="https://github.com/Microsoft/CNTK/wiki/Object-Detection-using-Fast-R
 First, load the module and create an instance of a CNTKFRCNNModel object.
 
 The constructor accepts an options object with the following fields:
- - cntkModelPath : Path to the CNTK Fast-RCNN model file.
+ - cntkModelPath : Path to the CNTK Faster-RCNN model file.
  - cntkPath : The directory in which CNTK is installed. Default value: 'C:\local\cntk'.
  - cntkEnv : The CNTK env to use (e.g. 'cntk-py34', or 'cntk-py35'). If not specified, the latest available version is used.
  - verbose : if set - the module will write verbose output when running evaluation. Default: false.
@@ -39,7 +35,7 @@ For example:
 ```javascript
 const CNTKFRCNNModel = require('cntk-fastrcnn').CNTKFRCNNModel;
 
-const modelFileLocation = 'C:\\cntk_model\\Fast-RCNN.model';
+const modelFileLocation = 'C:\\cntk_model\\Faster-RCNN.model';
 
 model = new CNTKFRCNNModel({cntkModelPath : modelFileLocation});
 ```
@@ -104,7 +100,7 @@ Here is an example of the result object of a directory that contains 2 images (n
 ### Adding descriptive classes names
 Since CNTK does not embed the names of the classes in the model, on default, the module returns non descriptive names for the classes, e.g. "class_1", "class_2".
 
-If you want the module to return more descriptive names, you can place a JSON file named "model.json" in the same directory of the Fast-RCNN model file.
+If you want the module to return more descriptive names, you can place a JSON file named "model.json" in the same directory of the Faster-RCNN model file.
 You can then place the descriptions of the classes in the JSON file under the "classes" key.
 
 For example, the following JSON will describe the classes for the above example:
@@ -114,8 +110,8 @@ For example, the following JSON will describe the classes for the above example:
     "classes" : {
         "background" : 0,
         "human" : 1,
-		"cat" : 2,
-		"dog" : 3
+	"cat" : 2,
+	"dog" : 3
     }
 }
 ```

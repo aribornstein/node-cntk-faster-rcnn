@@ -1,0 +1,55 @@
+{
+  "_from": "cntk-fastrcnn@^0.2.6",
+  "_id": "cntk-fastrcnn@0.2.6",
+  "_inBundle": false,
+  "_integrity": "sha1-pmwDtWdKu7ugwpaYUK64VGFCJS0=",
+  "_location": "/cntk-fastrcnn",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "cntk-fastrcnn@^0.2.6",
+    "name": "cntk-fastrcnn",
+    "escapedName": "cntk-fastrcnn",
+    "rawSpec": "^0.2.6",
+    "saveSpec": null,
+    "fetchSpec": "^0.2.6"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/cntk-fastrcnn/-/cntk-fastrcnn-0.2.6.tgz",
+  "_shasum": "a66c03b5674abbbba0c2969850aeb8546142252d",
+  "_spec": "cntk-fastrcnn@^0.2.6",
+  "_where": "C:\\Users\\ari-razer\\Documents\\VoTT",
+  "author": {
+    "name": "nadavbar"
+  },
+  "bugs": {
+    "url": "https://github.com/nadavbar/node-cntk-fastrcnn/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "tmp": "0.0.31"
+  },
+  "deprecated": false,
+  "description": "node.js API for CNTK Fast-RCNN model",
+  "homepage": "https://github.com/nadavbar/node-cntk-fastrcnn#readme",
+  "keywords": [
+    "CNTK",
+    "RCNN",
+    "Deep",
+    "Learning"
+  ],
+  "license": "MIT",
+  "main": "main.js",
+  "name": "cntk-fastrcnn",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nadavbar/node-cntk-fastrcnn.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.2.6"
+}

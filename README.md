@@ -4,10 +4,10 @@ A node wrapper a CNTK Faster-RCNN model
 This module is based on the work done by ![Nadav Bar](https://github.com/nadavbar/node-cntk-fastrcnn/) the evaluation script has been updated to support cntk faster-rcnn 
 
 ### Installation
-Install by running:
+Install by running: (TBD Will Arrive Shortly)
 
 ```
-npm install cntk-fastrcnn
+npm install cntk-fastercnn
 ```
 
 ## Python Preliminaries

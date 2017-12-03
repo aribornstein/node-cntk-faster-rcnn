@@ -2,6 +2,7 @@ FRCNN_DIM = 850.
 import sys
 from os import path
 import json
+from PIL import Image
 from cntk import load_model
 
 def get_classes_description(model_file_path, classes_count):
@@ -17,6 +18,8 @@ def get_classes_description(model_file_path, classes_count):
 if __name__ == "__main__":
     import argparse
     import os
+    import time
+    start = time.time()
     parser = argparse.ArgumentParser(description='FRCNN Detector')
     
     parser.add_argument('--input', type=str, metavar='<path>',
@@ -44,7 +47,9 @@ if __name__ == "__main__":
         cntk_path = "C:\\local\\cntk"
     cntk_scripts_path = path.join(cntk_path, r"Examples/Image/Detection/")
     sys.path.append(cntk_scripts_path)
-    from ObjectDetector import predict
+
+    from FasterRCNN.FasterRCNN_eval import FasterRCNN_Evaluator
+    from ObjectDetector import predict, get_configuration
 
     input_path = args.input
     output_path = args.output
@@ -54,6 +59,8 @@ if __name__ == "__main__":
     labels_count = model.cls_pred.shape[1]
     model_classes = get_classes_description(model_path, labels_count)
     classes = list(model_classes.keys())
+    cfg = get_configuration(classes)
+    evaluator = FasterRCNN_Evaluator(model, cfg)
 
     if (output_path is None and json_output_path is None):
         parser.error("No directory output path or json output path specified")
@@ -73,15 +80,14 @@ if __name__ == "__main__":
                            "frames" : {}}
 
     print("Number of images to process: %d"%len(file_paths))
-
+    
     for file_path, counter in zip(file_paths, range(len(file_paths))):
-        from PIL import Image
         with Image.open(file_path) as img:
             width, height = img.size
         w, h = (width/FRCNN_DIM, height/FRCNN_DIM)
 
         print("Read file in path:", file_path)
-        rectangles = predict(file_path, model, classes)
+        rectangles = predict(file_path, evaluator, cfg)
         print(rectangles)
         for rect in rectangles:
             image_base_name = path.basename(file_path)
@@ -95,6 +101,7 @@ if __name__ == "__main__":
                 "y2" : int(y2 * h),
                 "class" : model_classes[rect["label"]]
             })
+
 
     if json_output_path is not None:
         with open(json_output_path, "wt") as handle:

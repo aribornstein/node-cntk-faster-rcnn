@@ -33,7 +33,7 @@ The constructor accepts an options object with the following fields:
 For example:
 
 ```javascript
-const CNTKFRCNNModel = require('cntk-fastrcnn').CNTKFRCNNModel;
+const CNTKFRCNNModel = require('cntk-fastercnn').CNTKFRCNNModel;
 
 const modelFileLocation = 'C:\\cntk_model\\Faster-RCNN.model';
 
@@ -98,20 +98,4 @@ Here is an example of the result object of a directory that contains 2 images (n
 ```
 
 ### Adding descriptive classes names
-Since CNTK does not embed the names of the classes in the model, on default, the module returns non descriptive names for the classes, e.g. "class_1", "class_2".
-
-If you want the module to return more descriptive names, you can place a JSON file named "model.json" in the same directory of the Faster-RCNN model file.
-You can then place the descriptions of the classes in the JSON file under the "classes" key.
-
-For example, the following JSON will describe the classes for the above example:
-
-```json
-{
-    "classes" : {
-        "background" : 0,
-        "human" : 1,
-	"cat" : 2,
-	"dog" : 3
-    }
-}
-```
+To add descriptive names copy the class_map.txt file from the dataset folder where you trained your FasterRCNN model into the same directory as your model file.

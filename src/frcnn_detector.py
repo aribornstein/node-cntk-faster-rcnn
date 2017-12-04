@@ -1,4 +1,3 @@
-FRCNN_DIM = 850.
 import sys
 from os import path
 import json
@@ -14,6 +13,10 @@ def get_classes_description(model_file_path, classes_count):
         for i in range(classes_count):
             classes_names["class_%d"%i] = i
         return classes_names
+    with open(model_desc_file_path) as handle:
+        file_content = handle.read()
+        model_desc = json.loads(file_content)
+    return model_desc["classes"]
 
 if __name__ == "__main__":
     import argparse
@@ -56,6 +59,8 @@ if __name__ == "__main__":
     json_output_path = args.json_output
     model_path =  args.model
     model = load_model(model_path)
+    FRCNN_DIM_W = model.arguments[0].shape[1]
+    FRCNN_DIM_H = model.arguments[0].shape[2]
     labels_count = model.cls_pred.shape[1]
     model_classes = get_classes_description(model_path, labels_count)
     classes = list(model_classes.keys())
@@ -84,7 +89,7 @@ if __name__ == "__main__":
     for file_path, counter in zip(file_paths, range(len(file_paths))):
         with Image.open(file_path) as img:
             width, height = img.size
-        w, h = (width/FRCNN_DIM, height/FRCNN_DIM)
+        w, h = (FRCNN_DIM_W/width, FRCNN_DIM_H/height)
 
         print("Read file in path:", file_path)
         rectangles = predict(file_path, evaluator, cfg)
@@ -101,7 +106,6 @@ if __name__ == "__main__":
                 "y2" : int(y2 * h),
                 "class" : model_classes[rect["label"]]
             })
-
 
     if json_output_path is not None:
         with open(json_output_path, "wt") as handle:

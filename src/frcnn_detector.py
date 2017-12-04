@@ -114,9 +114,9 @@ if __name__ == "__main__":
     else:
         file_paths = [input_path]
 
-
+    vott_classes = {model_classes[i]:i for i in range(len(model_classes))}
     if json_output_path is not None:
-        json_output_obj = {"classes": model_classes,
+        json_output_obj = {"classes":vott_classes,
                            "frames" : {}}
 
     print("Number of images to process: %d"%len(file_paths))
@@ -138,7 +138,7 @@ if __name__ == "__main__":
                 "y1" : int(y1 * h),
                 "x2" : int(x2 * w),
                 "y2" : int(y2 * h),
-                "class" : rect["label"]
+                "class" : vott_classes[rect["label"]]
             })
 
     if json_output_path is not None:

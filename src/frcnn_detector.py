@@ -1,22 +1,20 @@
-import sys
+import os, sys, json
 from os import path
-import json
+import numpy as np
 from PIL import Image
 from cntk import load_model
-
+from easydict import EasyDict as edict
+    
 def get_classes_description(model_file_path, classes_count):
     model_dir = path.dirname(model_file_path)
     classes_names = {}
-    model_desc_file_path = path.join(model_dir, 'model.json')
+    model_desc_file_path = path.join(model_dir, 'class_map.txt')
     if not path.exists(model_desc_file_path):
         # use default parameter names:
-        for i in range(classes_count):
-            classes_names["class_%d"%i] = i
-        return classes_names
+        return [ "class_{}".format(i) for i in range(classes_count)]
     with open(model_desc_file_path) as handle:
-        file_content = handle.read()
-        model_desc = json.loads(file_content)
-    return model_desc["classes"]
+        class_map = handle.read().strip().split('\n')
+        return [class_name.split('\t')[0] for class_name in class_map]
 
 if __name__ == "__main__":
     import argparse
@@ -52,7 +50,45 @@ if __name__ == "__main__":
     sys.path.append(cntk_scripts_path)
 
     from FasterRCNN.FasterRCNN_eval import FasterRCNN_Evaluator
-    from ObjectDetector import predict, get_configuration
+    from utils.config_helpers import merge_configs
+    import utils.od_utils as od
+
+    available_detectors = ['FasterRCNN']
+
+    def get_configuration(classes):
+        # load configs for detector, base network and data set
+        from FasterRCNN.FasterRCNN_config import cfg as detector_cfg
+
+        # for VGG16 base model use:         from utils.configs.VGG16_config import cfg as network_cfg
+        # for AlexNet base model use:       from utils.configs.AlexNet_config import cfg as network_cfg
+        from utils.configs.AlexNet_config import cfg as network_cfg
+        dataset_cfg = generate_data_cfg(classes)
+        return merge_configs([detector_cfg, network_cfg, dataset_cfg, {'DETECTOR': 'FasterRCNN'}])
+
+    def generate_data_cfg(classes):
+        cfg = edict({"DATA":edict()})
+        cfg.NUM_CHANNELS = 3 # image channels
+        cfg["DATA"].CLASSES = classes
+        cfg["DATA"].NUM_CLASSES = len(classes)
+        return cfg
+
+    def predict(img_path, evaluator, cfg, debug=False):
+        # detect objects in single image
+        regressed_rois, cls_probs = evaluator.process_image(img_path)
+        bboxes, labels, scores = od.filter_results(regressed_rois, cls_probs, cfg)
+        # visualize detections on image
+        if debug:
+            od.visualize_results(img_path, bboxes, labels, scores, cfg)
+        # write detection results to output
+        fg_boxes = np.where(labels > 0)
+        result = []
+        for i in fg_boxes[0]:
+            print (cfg["DATA"].CLASSES)
+            print(labels)
+            result.append({'label':cfg["DATA"].CLASSES[labels[i]], 'score':'%.3f'%(scores[i]), 'box':[int(v) for v in bboxes[i]]})
+        return result
+
+    # from ObjectDetector import predict, get_configuration
 
     input_path = args.input
     output_path = args.output
@@ -63,8 +99,7 @@ if __name__ == "__main__":
     FRCNN_DIM_H = model.arguments[0].shape[2]
     labels_count = model.cls_pred.shape[1]
     model_classes = get_classes_description(model_path, labels_count)
-    classes = list(model_classes.keys())
-    cfg = get_configuration(classes)
+    cfg = get_configuration(model_classes)
     evaluator = FasterRCNN_Evaluator(model, cfg)
 
     if (output_path is None and json_output_path is None):
@@ -89,11 +124,10 @@ if __name__ == "__main__":
     for file_path, counter in zip(file_paths, range(len(file_paths))):
         with Image.open(file_path) as img:
             width, height = img.size
-        w, h = (FRCNN_DIM_W/width, FRCNN_DIM_H/height)
+        w, h = (width/FRCNN_DIM_W, height/FRCNN_DIM_H)
 
         print("Read file in path:", file_path)
         rectangles = predict(file_path, evaluator, cfg)
-        print(rectangles)
         for rect in rectangles:
             image_base_name = path.basename(file_path)
             regions_list = []
@@ -104,11 +138,10 @@ if __name__ == "__main__":
                 "y1" : int(y1 * h),
                 "x2" : int(x2 * w),
                 "y2" : int(y2 * h),
-                "class" : model_classes[rect["label"]]
+                "class" : rect["label"]
             })
 
     if json_output_path is not None:
         with open(json_output_path, "wt") as handle:
             json_dump = json.dumps(json_output_obj, indent=2)
             handle.write(json_dump)
-

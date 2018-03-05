@@ -33,7 +33,7 @@ function CNTKFRCNNModel(opts) {
     this.cntkPath = opts.cntkPath || DEFAULT_CNTK_INSTALL_PATH;
     this.cntkEnv = opts.cntkEnv;
     this.anacondaPath = opts.anacondaPath;
-    this.verbose = opts.verbose;
+    this.verbose = true; //opts.verbose;
 
     evalClient = new EvalClient(this.cntkModelPath, this.cntkPath, this.cntkEnv, this.anacondaPath, this.verbose);
 

@@ -1,9 +1,12 @@
 import os, sys, json
+import re
 from os import path
 import numpy as np
 from PIL import Image
 from cntk import load_model
 from easydict import EasyDict as edict
+
+PAD = 114
     
 def get_classes_description(model_file_path, classes_count):
     model_dir = path.dirname(model_file_path)
@@ -15,6 +18,13 @@ def get_classes_description(model_file_path, classes_count):
     with open(model_desc_file_path) as handle:
         class_map = handle.read().strip().split('\n')
         return [class_name.split('\t')[0] for class_name in class_map]
+
+# from https://stackoverflow.com/questions/12093940/reading-files-in-a-particular-order-in-python
+numbers = re.compile(r'(\d+)')
+def numerical_sort(value):
+    parts = numbers.split(value)
+    parts[1::2] = map(int, parts[1::2])
+    return parts
 
 if __name__ == "__main__":
     import argparse
@@ -41,6 +51,8 @@ if __name__ == "__main__":
                         help='Path to output JSON file', required=False)
 
     args = parser.parse_args()
+
+    print(args)
 
     if args.cntk_path:
         cntk_path = args.cntk_path
@@ -78,13 +90,13 @@ if __name__ == "__main__":
         bboxes, labels, scores = od.filter_results(regressed_rois, cls_probs, cfg)
         # visualize detections on image
         if debug:
-            od.visualize_results(img_path, bboxes, labels, scores, cfg)
+            od.visualize_results(img_path, bboxes, labels, scores, cfg, store_to_path=img_path+"o.jpg")
         # write detection results to output
         fg_boxes = np.where(labels > 0)
         result = []
         for i in fg_boxes[0]:
-            print (cfg["DATA"].CLASSES)
-            print(labels)
+            # print (cfg["DATA"].CLASSES)
+            # print(labels)
             result.append({'label':cfg["DATA"].CLASSES[labels[i]], 'score':'%.3f'%(scores[i]), 'box':[int(v) for v in bboxes[i]]})
         return result
 
@@ -110,7 +122,7 @@ if __name__ == "__main__":
     
     if os.path.isdir(input_path):
         import glob
-        file_paths = glob.glob(os.path.join(input_path, '*.jpg'))
+        file_paths = sorted(glob.glob(os.path.join(input_path, '*.jpg')), key=numerical_sort)
     else:
         file_paths = [input_path]
 
@@ -122,26 +134,30 @@ if __name__ == "__main__":
     print("Number of images to process: %d"%len(file_paths))
     
     for file_path, counter in zip(file_paths, range(len(file_paths))):
-        with Image.open(file_path) as img:
-            width, height = img.size
-        w, h = (width/FRCNN_DIM_W, height/FRCNN_DIM_H)
-
+        width, height = Image.open(file_path).size
+        scale = max(width, height)/ max(FRCNN_DIM_W, FRCNN_DIM_H)
+        
         print("Read file in path:", file_path)
         rectangles = predict(file_path, evaluator, cfg)
+        regions_list = []
         for rect in rectangles:
             image_base_name = path.basename(file_path)
-            regions_list = []
-            json_output_obj["frames"][image_base_name] = {"regions": regions_list}
             x1, y1, x2, y2 = rect["box"]
+            if height > width :
+                x1, x2 = x1-PAD, x2-PAD
+            else:
+                y1, y2 = y1-PAD, y2-PAD 
             regions_list.append({
-                "x1" : int(x1 * w),
-                "y1" : int(y1 * h),
-                "x2" : int(x2 * w),
-                "y2" : int(y2 * h),
+                "x1" : int(x1 * scale),
+                "y1" : int(y1 * scale),
+                "x2" : int(x2 * scale),
+                "y2" : int(y2 * scale),
                 "class" : vott_classes[rect["label"]]
             })
+        json_output_obj["frames"][image_base_name] = {"regions": regions_list}
 
     if json_output_path is not None:
+        print(json_output_path)
         with open(json_output_path, "wt") as handle:
             json_dump = json.dumps(json_output_obj, indent=2)
             handle.write(json_dump)

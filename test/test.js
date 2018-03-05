@@ -3,7 +3,7 @@ const m = require('../');
 
 
 const modelFileLocation = path.join(__dirname, 'm.model');
-const imagesDir = path.join(__dirname, 'test_imgs');
+const imagesDir = path.join(__dirname, 'testImages');
 
 model = new m.CNTKFRCNNModel({cntkModelPath : modelFileLocation,
     verbose : true});

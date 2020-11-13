@@ -15,7 +15,7 @@ Since the FRCNN detector uses bits of the CNTK Fast-RCNN implementation it has t
 Faster-RCNN training pipeline. 
 
 Before running the code in this repository, please make sure to install the required python packages as described
-in <a href="https://docs.microsoft.com/en-us/cognitive-toolkit/object-detection-using-faster-r-cnn#setup">the Fast-RCNN CNTK tutorial</a>.  
+in <a href="https://docs.microsoft.com/cognitive-toolkit/object-detection-using-faster-r-cnn?WT.mc_id=aiml-0000-abornst#setup">the Fast-RCNN CNTK tutorial</a>.  
 
 
 ### How to use
